@@ -10,3 +10,5 @@
 #define DHTPIN 12
 
 // WebServer
+#define WIFI_SSID "XXX"
+#define WIFI_PASS "XXX"
