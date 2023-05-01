@@ -3,61 +3,69 @@
 #include "configuration.h"
 #include "mhz_sensor.h"
 #include "dht_sensor.h"
+#include "web_server.h"
 
-#include <ESP8266WiFi.h>
-#include <ESP8266WebServer.h>
+// #include <ESP8266WiFi.h>
+// #include <ESP8266WebServer.h>
 
+WebServer *webServer;
 MhzSensor *mhzSensor;
 DhtSensor *dhtSensor;
 unsigned long getDataTimer = 0;
 
 // Create a new web server
-ESP8266WebServer webserver(80);
+// ESP8266WebServer webserver(80);
 
 // Handle Root
-void rootPage()
-{
-  webserver.send(200, "text/plain", "Home Page!");
-}
+// void rootPage()
+// {
+//   webserver.send(200, "text/plain", "Home Page!");
+// }
 
 // Handle 404
-void notfoundPage()
-{
-  webserver.send(404, "text/plain", "404: Not found");
-}
+// void notfoundPage()
+// {
+//   webserver.send(404, "text/plain", "404: Not found");
+// }
 
 void setup()
 {
   Serial.begin(BAUDRATE);
 
   // Begin WiFi
-  WiFi.begin(WIFI_SSID, WIFI_PASS);
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    delay(100);
-    Serial.print(".");
-  }
+  // WiFi.begin(WIFI_SSID, WIFI_PASS);
+  // while (WiFi.status() != WL_CONNECTED)
+  // {
+  //   delay(100);
+  //   Serial.print(".");
+  // }
 
   // WiFi Connected
-  Serial.println("");
-  Serial.print("Connected! IP address: ");
-  Serial.println(WiFi.localIP());
+  // Serial.println("");
+  // Serial.print("Connected! IP address: ");
+  // Serial.println(WiFi.localIP());
 
+  Serial.println("\nStarting setup");
+  webServer = new WebServer();
   mhzSensor = new MhzSensor();
   dhtSensor = new DhtSensor();
 
+  webServer->setup();
   mhzSensor->setup();
   dhtSensor->setup();
 
+  Serial.println("\nStarting finished");
+
   // Start Web Server
-  webserver.on("/", rootPage);
-  webserver.onNotFound(notfoundPage);
-  webserver.begin();
+  // webserver.on("/", rootPage);
+  // webserver.onNotFound(notfoundPage);
+  // webserver.begin();
 }
 
 void loop()
 {
-  webserver.handleClient(); 
+  // webserver.handleClient();
+  webServer->handleClient();
 
   if (millis() - getDataTimer >= 5000)
   {
@@ -79,6 +87,8 @@ void loop()
     Serial.println("%");
 
     Serial.println("");
+
+    webServer->updatedValues(temp, hum, ppm);
 
     // Reset 5 sec timer
     getDataTimer = millis();
